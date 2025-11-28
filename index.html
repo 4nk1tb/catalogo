@@ -1,0 +1,359 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Brain, 
+  Calculator, 
+  Code, 
+  Feather, 
+  Search, 
+  Sparkles, 
+  Zap, 
+  X, 
+  Cpu, 
+  Globe, 
+  MessageSquare,
+  ChevronRight,
+  Info,
+  Headphones, // Nuevo para NotebookLM
+  Palette,    // Nuevo para Midjourney
+  Layers      // Nuevo para Llama
+} from 'lucide-react';
+
+// --- DATA: Las IAs del Futuro (Nov 2025 Context) ---
+const aiTools = [
+  {
+    id: 'gemini3',
+    name: 'Gemini 3 Pro Preview',
+    company: 'Google DeepMind',
+    category: 'math',
+    badge: 'Récord Lógico',
+    icon: <Calculator className="w-6 h-6" />,
+    color: 'from-blue-500 to-purple-600',
+    description: 'La autoridad absoluta en lógica matemática y física compleja. Ha roto todos los récords de razonamiento en Noviembre 2025.',
+    bestFor: ['Cálculo Avanzado', 'Física Cuántica', 'Resolución de Problemas de Pasos Múltiples'],
+    weakness: 'Puede ser excesivamente detallado para preguntas simples.'
+  },
+  {
+    id: 'notebooklm',
+    name: 'NotebookLM',
+    company: 'Google',
+    category: 'research',
+    badge: 'Podcast de Estudio',
+    icon: <Headphones className="w-6 h-6" />,
+    color: 'from-lime-400 to-green-500',
+    description: 'Tu compañero de estudio definitivo. Sube tus PDFs y genera un podcast de audio estilo radio donde dos anfitriones discuten tu temario.',
+    bestFor: ['Repasar exámenes (Audio)', 'Entender fuentes complejas', 'Citas exactas de tus PDFs'],
+    weakness: 'Solo sabe lo que tú le subes (no busca en web en modo estricto).'
+  },
+  {
+    id: 'midjourney',
+    name: 'Midjourney v7',
+    company: 'Midjourney',
+    category: 'creative',
+    badge: 'Arte Visual',
+    icon: <Palette className="w-6 h-6" />,
+    color: 'from-pink-500 to-rose-500',
+    description: 'Si puedes imaginarlo, puede pintarlo. La calidad fotorealista y artística es inigualable en 2025 para tus presentaciones.',
+    bestFor: ['Diapositivas impactantes', 'Inspiración artística', 'Fotografía sintética'],
+    weakness: 'No es bueno generando texto legible dentro de las imágenes.'
+  },
+  {
+    id: 'claude',
+    name: 'Claude 3.7 Sonnet',
+    company: 'Anthropic',
+    category: 'code',
+    badge: 'Arquitecto de Software',
+    icon: <Code className="w-6 h-6" />,
+    color: 'from-orange-500 to-red-500',
+    description: 'El mejor aliado para programadores. Entiende arquitecturas de sistemas complejos y escribe código limpio y seguro.',
+    bestFor: ['Desarrollo Web Full-Stack', 'Refactorización', 'Explicación de Código'],
+    weakness: 'Más estricto con las normas de seguridad (refusal rate).'
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek R1',
+    company: 'DeepSeek AI',
+    category: 'code',
+    badge: 'Open Source King',
+    icon: <Cpu className="w-6 h-6" />,
+    color: 'from-cyan-500 to-blue-500',
+    description: 'La potencia del código abierto. Increíblemente eficiente para scripts, automatización y tareas técnicas sin coste.',
+    bestFor: ['Python Scripts', 'Automatización', 'Consultas SQL'],
+    weakness: 'Menos capaz en escritura creativa o matices culturales.'
+  },
+  {
+    id: 'kimi2',
+    name: 'Kimi 2 (Moonshot)',
+    company: 'Moonshot AI',
+    category: 'research',
+    badge: 'Contexto Infinito',
+    icon: <Globe className="w-6 h-6" />,
+    color: 'from-indigo-400 to-cyan-400',
+    description: 'Capaz de leer libros enteros o miles de documentos legales en segundos sin perder el hilo.',
+    bestFor: ['Análisis de PDFs gigantes', 'Resumen de Libros', 'Investigación Legal'],
+    weakness: 'Velocidad de respuesta variable con cargas masivas.'
+  },
+  {
+    id: 'llama4',
+    name: 'Llama 4 (405B)',
+    company: 'Meta',
+    category: 'general',
+    badge: 'Privacidad Local',
+    icon: <Layers className="w-6 h-6" />,
+    color: 'from-blue-600 to-indigo-700',
+    description: 'El modelo "abierto" más potente. Ideal si te preocupa la privacidad y quieres opciones que se pueden ejecutar localmente.',
+    bestFor: ['Privacidad de datos', 'Uso sin internet (versiones pequeñas)', 'Chat general'],
+    weakness: 'Requiere hardware potente para correr localmente la versión completa.'
+  },
+  {
+    id: 'grok4',
+    name: 'Grok 4.1',
+    company: 'xAI',
+    category: 'general',
+    badge: 'Tiempo Real',
+    icon: <Zap className="w-6 h-6" />,
+    color: 'from-gray-100 to-gray-400 text-black',
+    textColor: 'text-black',
+    description: 'Acceso directo al pulso del mundo. Analiza tendencias de redes sociales y noticias en tiempo real con un toque de humor.',
+    bestFor: ['Noticias de última hora', 'Análisis de Sentimiento', 'Debates sin filtros'],
+    weakness: 'Propenso a alucinaciones en temas académicos estrictos.'
+  },
+  {
+    id: 'gpt5',
+    name: 'ChatGPT-5o',
+    company: 'OpenAI',
+    category: 'writing',
+    badge: 'El Generalista',
+    icon: <MessageSquare className="w-6 h-6" />,
+    color: 'from-green-400 to-emerald-600',
+    description: 'El navaja suiza. Excelente para redacción, ideas creativas y conversación fluida multimodal.',
+    bestFor: ['Ensayos', 'Ideación (Brainstorming)', 'Traducción Natural'],
+    weakness: 'Superado por especialistas en matemáticas puras o código complejo.'
+  },
+  {
+    id: 'qwen',
+    name: 'Qwen 2.5 Max',
+    company: 'Alibaba Cloud',
+    category: 'general',
+    badge: 'Políglota',
+    icon: <Brain className="w-6 h-6" />,
+    color: 'from-violet-500 to-fuchsia-500',
+    description: 'Impresionante capacidad multilingüe y comprensión de contextos culturales diversos, especialmente asiáticos.',
+    bestFor: ['Traducción Técnica', 'Comercio Internacional', 'Matemáticas Básicas'],
+    weakness: 'Menor conocimiento de cultura pop occidental.'
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity Pro',
+    company: 'Perplexity',
+    category: 'research',
+    badge: 'El Bibliotecario',
+    icon: <Search className="w-6 h-6" />,
+    color: 'from-teal-400 to-teal-700',
+    description: 'No es un chatbot, es un motor de respuesta. Cita fuentes reales para cada afirmación.',
+    bestFor: ['Papers Académicos', 'Fact-Checking', 'Búsqueda de Datos'],
+    weakness: 'Poca creatividad literaria.'
+  }
+];
+
+const categories = [
+  { id: 'all', label: 'Todo', icon: <Sparkles size={14} /> },
+  { id: 'math', label: 'Lógica/Math', icon: <Calculator size={14} /> },
+  { id: 'code', label: 'Código', icon: <Code size={14} /> },
+  { id: 'writing', label: 'Escritura', icon: <Feather size={14} /> },
+  { id: 'research', label: 'Investigar', icon: <Search size={14} /> },
+  { id: 'creative', label: 'Creativo', icon: <Palette size={14} /> }, // Nueva categoría
+];
+
+export default function AISelectorApp() {
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedAI, setSelectedAI] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
+  // Fix logic for filtering
+  const getFilteredAI = () => {
+    if (activeCategory === 'all') return aiTools;
+    return aiTools.filter(ai => ai.category === activeCategory || (activeCategory === 'general' && ai.category === 'general'));
+  }
+
+  const visibleAI = getFilteredAI();
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans overflow-x-hidden selection:bg-purple-500 selection:text-white">
+      
+      {/* Background Gradients */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] animate-pulse delay-1000"></div>
+      </div>
+
+      {/* Header Section (Slide 2 Concept) */}
+      <header className={`p-6 pt-10 transition-all duration-1000 transform ${isLoaded ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'}`}>
+        <div className="inline-block px-3 py-1 mb-4 text-xs font-bold tracking-wider text-cyan-400 uppercase bg-cyan-900/30 rounded-full border border-cyan-500/30">
+          Guía Interactiva 2025
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400 mb-4 leading-tight">
+          El Mito del <br/>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Cerebro Único</span>
+        </h1>
+        <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
+          Un carpintero no usa un martillo para cortar madera. <br/>
+          <span className="text-slate-200 font-medium">No uses la misma IA para todo.</span>
+        </p>
+      </header>
+
+      {/* Sticky Category Nav */}
+      <nav className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-lg border-b border-white/5 py-4 px-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-3 min-w-max">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`
+                flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95
+                ${activeCategory === cat.id 
+                  ? 'bg-white text-slate-950 shadow-[0_0_20px_rgba(255,255,255,0.3)]' 
+                  : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-white border border-white/5'}
+              `}
+            >
+              {cat.icon}
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* Main Grid */}
+      <main className="p-4 pb-24 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visibleAI.map((ai, index) => (
+            <div
+              key={ai.id}
+              onClick={() => setSelectedAI(ai)}
+              className={`
+                group relative bg-slate-900/50 hover:bg-slate-800/80 border border-white/10 rounded-2xl p-5 cursor-pointer
+                transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]
+                ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
+              `}
+              style={{ transitionDelay: `${index * 50}ms` }}
+            >
+              {/* Card Badge */}
+              <div className="absolute top-4 right-4">
+                 <span className={`text-[10px] font-bold px-2 py-1 rounded-full bg-gradient-to-r ${ai.color} ${ai.textColor || 'text-white'} shadow-lg`}>
+                   {ai.badge}
+                 </span>
+              </div>
+
+              {/* Icon & Title */}
+              <div className="flex items-center gap-4 mb-4 mt-2">
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${ai.color} bg-opacity-20 shadow-inner text-white`}>
+                  {ai.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-white group-hover:text-purple-300 transition-colors">{ai.name}</h3>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider">{ai.company}</p>
+                </div>
+              </div>
+
+              {/* Short Desc */}
+              <p className="text-slate-400 text-sm line-clamp-2 mb-4 group-hover:text-slate-300 transition-colors">
+                {ai.description}
+              </p>
+
+              {/* "Tap to view" hint */}
+              <div className="flex items-center text-xs text-slate-500 font-medium group-hover:text-cyan-400 transition-colors">
+                Ver análisis completo <ChevronRight size={14} className="ml-1" />
+              </div>
+              
+              {/* Border Gradient Effect on Hover */}
+              <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-purple-500/30 transition-all duration-500 pointer-events-none"></div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Instructions / Footer */}
+      <footer className="text-center p-8 text-slate-600 text-sm pb-10">
+        <p>Presentación 2025 • Escanea para explorar</p>
+      </footer>
+
+      {/* Modal / Overlay Detail View */}
+      {selectedAI && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
+            onClick={() => setSelectedAI(null)}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative w-full max-w-lg bg-slate-900 md:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300 border border-white/10 max-h-[90vh] overflow-y-auto">
+            
+            {/* Header Image/Color Block */}
+            <div className={`h-32 bg-gradient-to-br ${selectedAI.color} relative p-6 flex flex-col justify-end`}>
+              <button 
+                onClick={() => setSelectedAI(null)}
+                className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white backdrop-blur-sm transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="flex items-center gap-3">
+                 <div className="p-2 bg-black/30 backdrop-blur-md rounded-lg text-white">
+                    {selectedAI.icon}
+                 </div>
+                 <h2 className={`text-3xl font-bold text-white drop-shadow-md ${selectedAI.textColor || ''}`}>{selectedAI.name}</h2>
+              </div>
+            </div>
+
+            <div className="p-6 md:p-8 space-y-6">
+              
+              {/* Main Description */}
+              <div>
+                <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Análisis</h4>
+                <p className="text-slate-300 text-lg leading-relaxed">{selectedAI.description}</p>
+              </div>
+
+              {/* Grid: Best For vs Weakness */}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3 text-emerald-400 font-bold">
+                    <Sparkles size={18} />
+                    <h3>Mejor para...</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {selectedAI.bestFor.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-emerald-200/80 text-sm">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2 text-red-400 font-bold">
+                    <Info size={18} />
+                    <h3>Advertencia</h3>
+                  </div>
+                  <p className="text-red-200/70 text-sm">
+                    {selectedAI.weakness}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button className="w-full py-4 rounded-xl font-bold bg-white text-slate-950 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
+                Probar {selectedAI.name.split(" ")[0]} ahora
+                <ChevronRight size={18} />
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
