@@ -138,7 +138,8 @@
 
             <!-- Footer Modal (Fijo) -->
             <div class="p-4 border-t border-white/5 bg-slate-900 shrink-0">
-                <button onclick="window.open('https://google.com/search?q=IA', '_blank')" class="w-full py-3.5 rounded-xl font-bold bg-white text-slate-950 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group shadow-lg shadow-white/5">
+                <!-- Se añade ID para controlar el link desde JS -->
+                <button id="modal-action-btn" class="w-full py-3.5 rounded-xl font-bold bg-white text-slate-950 hover:bg-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group shadow-lg shadow-white/5">
                     <span id="modal-btn-text">Probar ahora</span>
                     <i data-lucide="external-link" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"></i>
                 </button>
@@ -148,6 +149,7 @@
 
     <script>
         // --- DATA ---
+        // Se añaden las URLs oficiales a cada objeto
         const aiTools = [
             {
                 id: 'gemini3',
@@ -156,6 +158,7 @@
                 category: 'math',
                 badge: 'Récord Lógico',
                 iconName: 'calculator',
+                url: 'https://gemini.google.com/app',
                 color: 'from-blue-600 to-purple-600',
                 description: 'La autoridad absoluta en lógica matemática y física compleja. Ha roto todos los récords de razonamiento conocidos hasta la fecha.',
                 bestFor: ['Cálculo Avanzado', 'Física Cuántica', 'Problemas de Pasos Múltiples'],
@@ -168,6 +171,7 @@
                 category: 'research',
                 badge: 'Podcast Estudio',
                 iconName: 'headphones',
+                url: 'https://notebooklm.google.com/',
                 color: 'from-lime-500 to-green-600',
                 description: 'Sube tus PDFs y genera un podcast de audio estilo radio donde dos anfitriones discuten tu temario. Perfecto para aprender escuchando.',
                 bestFor: ['Repasar exámenes (Audio)', 'Entender fuentes complejas', 'Citas exactas'],
@@ -180,6 +184,7 @@
                 category: 'creative',
                 badge: 'Arte Visual',
                 iconName: 'palette',
+                url: 'https://www.midjourney.com/',
                 color: 'from-pink-600 to-rose-600',
                 description: 'La calidad fotorealista y artística es inigualable. Si necesitas imágenes para diapositivas que impacten, esta es la herramienta.',
                 bestFor: ['Diapositivas visuales', 'Inspiración artística', 'Fotografía sintética'],
@@ -192,6 +197,7 @@
                 category: 'code',
                 badge: 'Arquitectura',
                 iconName: 'code',
+                url: 'https://claude.ai/',
                 color: 'from-orange-500 to-red-600',
                 description: 'Entiende arquitecturas de sistemas complejos mejor que nadie. Escribe código limpio, seguro y muy bien explicado.',
                 bestFor: ['Desarrollo Full-Stack', 'Refactorización', 'Explicación de Código'],
@@ -204,6 +210,7 @@
                 category: 'code',
                 badge: 'Open Source',
                 iconName: 'cpu',
+                url: 'https://chat.deepseek.com/',
                 color: 'from-cyan-500 to-blue-600',
                 description: 'La potencia del código abierto. Increíblemente eficiente para scripts, automatización y tareas técnicas sin coste.',
                 bestFor: ['Python Scripts', 'Automatización', 'Consultas SQL'],
@@ -216,6 +223,7 @@
                 category: 'research',
                 badge: 'Contexto Infinito',
                 iconName: 'globe',
+                url: 'https://kimi.moonshot.cn/',
                 color: 'from-indigo-500 to-cyan-500',
                 description: 'Capaz de leer libros enteros o miles de documentos legales en segundos sin "olvidar" lo que leyó al principio.',
                 bestFor: ['Análisis de PDFs gigantes', 'Resumen de Libros', 'Investigación Legal'],
@@ -228,6 +236,7 @@
                 category: 'general',
                 badge: 'Privacidad',
                 iconName: 'layers',
+                url: 'https://www.meta.ai/',
                 color: 'from-blue-700 to-indigo-800',
                 description: 'El modelo potente que puedes ejecutar localmente. Ideal si la privacidad de tus datos es la prioridad número uno.',
                 bestFor: ['Privacidad de datos', 'Uso Offline', 'Chat general'],
@@ -240,6 +249,7 @@
                 category: 'general',
                 badge: 'Tiempo Real',
                 iconName: 'zap',
+                url: 'https://x.com/i/grok',
                 color: 'from-gray-100 to-gray-400 text-black',
                 textColor: 'text-black',
                 description: 'Acceso directo a X (Twitter). Analiza tendencias y noticias en tiempo real con un toque de humor picante.',
@@ -253,6 +263,7 @@
                 category: 'writing',
                 badge: 'Generalista',
                 iconName: 'message-square',
+                url: 'https://chatgpt.com/',
                 color: 'from-green-500 to-emerald-700',
                 description: 'La navaja suiza. Excelente para redacción, ideas creativas y conversación fluida multimodal (voz/imagen).',
                 bestFor: ['Ensayos', 'Brainstorming', 'Traducción Natural'],
@@ -265,6 +276,7 @@
                 category: 'general',
                 badge: 'Políglota',
                 iconName: 'brain',
+                url: 'https://chat.qwenlm.ai/',
                 color: 'from-violet-600 to-fuchsia-600',
                 description: 'Impresionante capacidad multilingüe. Comprende contextos culturales diversos mejor que los modelos occidentales.',
                 bestFor: ['Traducción Técnica', 'Comercio Internacional', 'Matemáticas'],
@@ -277,6 +289,7 @@
                 category: 'research',
                 badge: 'Buscador Pro',
                 iconName: 'search',
+                url: 'https://www.perplexity.ai/',
                 color: 'from-teal-500 to-teal-800',
                 description: 'No es un chatbot, es un motor de respuesta. Cita fuentes reales para cada afirmación que hace.',
                 bestFor: ['Papers Académicos', 'Fact-Checking', 'Datos precisos'],
@@ -325,7 +338,7 @@
                 return ai.category === activeCategory || (activeCategory === 'general' && ai.category === 'general');
             });
 
-            // --- CAMBIO CLAVE: ESTRUCTURA FLEX COLUMN PARA SIMETRÍA ---
+            // --- ESTRUCTURA FLEX COLUMN PARA SIMETRÍA ---
             grid.innerHTML = filtered.map((ai, index) => `
                 <div 
                     onclick="openModal('${ai.id}')"
@@ -394,6 +407,10 @@
             
             // Icono
             document.getElementById('modal-icon-container').innerHTML = `<i data-lucide="${ai.iconName}" class="w-8 h-8"></i>`;
+
+            // Botón de Acción - Asignación dinámica del link
+            const actionBtn = document.getElementById('modal-action-btn');
+            actionBtn.onclick = () => window.open(ai.url, '_blank');
 
             // Lista Features
             const bestList = document.getElementById('modal-best');
